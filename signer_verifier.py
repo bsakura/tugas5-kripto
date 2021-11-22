@@ -17,10 +17,11 @@ class Signer:
         signed = self.signee + f"\n\n*DS*{rsa_encrypted}*DS*"
 
         fsplit = self.filename.split('.')
-        with open(f"{fsplit[0]}-signed.{fsplit[-1]}" if self.filename else 'signedOutput.txt','w') as f:
+        filename = f"{fsplit[0]}-signed.{fsplit[-1]}" if self.filename else 'signedOutput.txt'
+        with open(filename,'w') as f:
             f.write(signed)
         
-        return signed
+        return signed, filename
 
     def validateSign(self, filename):
         if not self.key_pair:
@@ -45,10 +46,11 @@ class Signer:
         
 if __name__=='__main__':
     ## Signing
-    # filename = input("Filename : ")
-    # signed_file = Signer(filename,file=True).signFile(encryption_function=encrypt_number)
-    # print("Outputed on")
-    ## Validation
     filename = input("Filename : ")
-    validation_result = Signer("").validateSign(filename)
+    signer = Signer(filename,file=True)
+    signed, ofile = signer.signFile(encryption_function=encrypt_number)
+    print(f"Outputed as {ofile}")
+    # filename = input("Filename : ")
+    print(f"Reloading {ofile} to validate")
+    validation_result = signer.validateSign(ofile)
     print("valid" if validation_result else "invalid")
