@@ -1,4 +1,5 @@
 def translate(message):
+    # print(message)
     charcodes = [ord(c) for c in message]
     bytes = []
     for char in charcodes:

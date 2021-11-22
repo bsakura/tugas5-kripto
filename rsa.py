@@ -63,12 +63,66 @@ def generate_key_pair(p, q):
 
     return ((e, n), (d, n))
 
+def generate_keys():
+    done = False
+    primes_file = open('primes.txt','r')
+    primes = primes_file.readlines()
+
+    while not done:
+        r1 = random.randint(50,100)
+        r2 = random.randint(50,100)
+
+        p = int(primes[r1])
+        q = int(primes[r2])
+        
+        if len(str(p*q)) % 2 == 0:
+            done = True
+    
+    n = p * q
+    toitent = (p-1) * (q-1)
+
+    searching = True
+    while (searching):
+        e = random.randrange(2, toitent)
+        if(gcd(e, toitent) == 1):
+            searching = False
+    
+    # e = 79
+    # toitent e
+    found = False
+    k = 1
+    while not found:
+        d = (1 + (k*toitent)) / e
+        if (d % 1 != 0):
+            k += 1
+        else:
+            found = True
+            d = int(d)
+
+    with open('key.pub', 'w') as f:
+        f.write(f"{str(n)},{str(e)}")
+        f.close()
+
+    with open('key.pri', 'w') as f:
+        f.write(f"{str(n)},{str(d)}")
+        f.close()
+
+    return n,e,d
+
 
 def encrypt(pk, plaintext):
     key, n = pk
     cipher = [pow(ord(char), key, n) for char in plaintext]
     return cipher
 
+def encrypt_number(text):
+    n, e, d = generate_keys()
+
+    res = int(text) ** d
+    res = res % n
+    res = hex(res)
+
+    return res
 
 def decrypt(pk, ciphertext):
     key, n = pk
