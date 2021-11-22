@@ -1,15 +1,12 @@
 import tkinter as tk
-from tkinter import filedialog
-
-def openFile():
-  filePath = filedialog.askopenfilename(filetypes=[('File', '*')])
-  if filePath is not None:
-    pass
-  return filePath
+from tkinter import messagebox, filedialog
+from signer_verifier import Signer
+from rsa import encrypt_number
 
 class App(tk.Tk):
   def __init__(self):
     super().__init__()
+    self.signer = Signer('primes.txt', True)
 
     self.title('Tugas 5 Kripto')
     self.resizable(False, False)
@@ -35,17 +32,38 @@ class App(tk.Tk):
     botFrame = tk.Frame(self, padx=25, pady=15)
     botFrame.grid(row=1, column=0)
 
-    self.signBtn = tk.Button(botFrame, text='Sign Text', width=25)
+    self.signBtn = tk.Button(botFrame, text='Sign Text', width=20, command=self.signFile)
     self.signBtn.grid(row=0, column=0, sticky='nsew')
 
-    self.validBtn = tk.Button(botFrame, text='Check Text', width=25)
+    self.validBtn = tk.Button(botFrame, text='Validate', width=20, command=self.validateText)
     self.validBtn.grid(row=0, column=1, sticky='nsew')
 
-    self.importBtn = tk.Button(botFrame, text='Import File', width=25)
-    self.importBtn.grid(row=1, column=0, sticky='nsew')
+    self.importBtn = tk.Button(botFrame, text='Import File', width=20, command=self.importFile)
+    self.importBtn.grid(row=0, column=2, sticky='nsew')
 
-    self.importKeyBtn = tk.Button(botFrame, text='Import Key', width=25)
-    self.importKeyBtn.grid(row=1, column=1, sticky='nsew')
+  # util
+  def importFile(self):
+    file = filedialog.askopenfile(mode='r')
+    fileContent = file.read()
+    self.inputText.delete('0.0', 'end')
+    self.inputText.insert('0.0', fileContent)
+
+  def signFile(self):
+    file = self.inputText.get('0.0', 'end-1c')
+    signed, ofile = self.signer.signFile(False, file, encryption_function=encrypt_number)
+    self.signedText.config(state="normal")
+    self.signedText.delete("0.0", "end")
+    self.signedText.insert("0.0", signed)
+    self.signedText.config(state="disabled")
+    
+  def validateText(self):
+    file = filedialog.askopenfilename(filetypes=[('Files', '*')])
+    validationResult = self.signer.validateSign(file)
+    
+    if validationResult:
+      tk.messagebox.showinfo('Result','Valid')
+    else:
+      tk.messagebox.showinfo('Result','Invalid')
 
 if __name__=='__main__':
   app = App()
