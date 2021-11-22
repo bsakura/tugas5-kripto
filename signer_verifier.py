@@ -11,7 +11,11 @@ class Signer:
             self.filename = source
         self.key_pair = key_pair
     
-    def signFile(self, encryption_function=None):
+    def signFile(self, filename=None, encryption_function=None):
+        if filename:
+            with open(filename,'r') as f:
+                self.signee = f.read().strip()
+            self.filename = filename
         file_sign = int(sha256(self.signee), 16)
         rsa_encrypted = encryption_function(file_sign) if encryption_function else file_sign
         signed = self.signee + f"\n\n*DS*{rsa_encrypted}*DS*"
@@ -41,7 +45,7 @@ class Signer:
 
         if hash == processed_signature:
             return True
-        else:
+        else: 
             return False
         
 if __name__=='__main__':
