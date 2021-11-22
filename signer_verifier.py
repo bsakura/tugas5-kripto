@@ -11,11 +11,15 @@ class Signer:
             self.filename = source
         self.key_pair = key_pair
     
-    def signFile(self, filename=None, encryption_function=None):
-        if filename:
-            with open(filename,'r') as f:
-                self.signee = f.read().strip()
-            self.filename = filename
+    def signFile(self, fromclass=False, source=False, file=False, encryption_function=None):
+        # PAKE FROMCLASS=TRUE KALO GADA FILE EKSTERNAL ATO STRING INPUT EKSTERNAL
+        if not fromclass:
+            if not file:
+                self.signee = source if source else ""
+            else:
+                with open(source,'r') as f:
+                    self.signee = f.read().strip()
+                self.filename = source
         file_sign = int(sha256(self.signee), 16)
         rsa_encrypted = encryption_function(file_sign) if encryption_function else file_sign
         signed = self.signee + f"\n\n*DS*{rsa_encrypted}*DS*"
